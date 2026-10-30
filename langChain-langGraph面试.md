@@ -152,7 +152,7 @@ langchain原生的createAgent内部虽然也实现了ReAct循环，但它的流�
 langgraph.js的核心优势在于它将工作流显式建模为“状态图”，执行流程完全有开发者通过节点（Node）和边（Edge）定义，而不是被框架固化。它原生支持循环（Agent的核心）、条件分支（if-else路由）、并行执行（Fan-out/Fan-in）、子图嵌套（模块化复用）、中断恢复（人机协作）等高级编排模式。这些能力的底层由Pregel运行时支撑。
 Pregel采用批量同步并行（BSP）模型，以“超级步”为单位执行。每个超级步分三阶段：Plan阶段根据状态变化确定本步要执行的节点；Execution阶段并行执行这些节点，节点各自计算并返回状态更新，单更新在本步内对其他节点不可见；Update阶段统一将所有更新按Reducer策略合并到状态中并保存检查点，然后进入下一个超级步。这种“先并行计算、后统一合并”的机制，既支持了并行执行，又避免了节点间的状态竞争，是langGraph能可靠编排复杂工作流的关键。
 
-# 请解释langchain.js中state、Annotation和Reducer的关系，多个节点并行更新同一字段时如何保证状态正确合并?
+# 请解释langGraph.js中state、Annotation和Reducer的关系，多个节点并行更新同一字段时如何保证状态正确合并?
 
 State(状态)是工作流的唯一数据载体，贯穿整个执行过程，所有节点都从状态读取数据、像状态返回更新。可以把它理解为工作流的“全局内存”。但状态不是随意定义的普通对象，他的结构由Annotation（注解）声明。
 Annotation定义了状态中每个字段的类型、默认值和Reducer（合并函数）、类似于带合并规则的TypeScript接口。例如消息列表字段会指定addMessages作为Reducer,普通字段可能不指定Reducer（默认直接覆盖）。Annotation的作用是让Pregel运行时知道如何处理节点对每个字段的更新.
