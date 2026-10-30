@@ -19,8 +19,7 @@ const messages=[
   new UserMessage(input)
 ]
 while(true){
-  const response=await model.
-  invoke(messages);
+  const response=await model.invoke(messages);
   messages.push(response);
   if(response.content.includes("Final Answer:")){
     return response.content.split("Final Answer:")[1].trim();
